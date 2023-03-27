@@ -1,7 +1,7 @@
 import { ICompletionContext, ICompletionResult, IConversationalCompletionChunk, IProvider } from "../../types";
 import { ModelProviderFactory } from "..";
 
-export default class OpenAIProvider implements IProvider {
+export default class AnthropicProvider implements IProvider {
     constructor(){
 
     }

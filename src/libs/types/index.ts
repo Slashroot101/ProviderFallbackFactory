@@ -10,6 +10,24 @@ export interface IPromptProcessor {
     process: (userInput: UserParameters, skill: Skill) => ConversationalCompletionItem[];
 }
 
+export type OpenAiCompletionChunk = {
+    id: string;
+    object: string;
+    created: number;
+    model: string;
+    choices: {delta: {content: string}, index: number, finish_reason: string}[]
+}
+
+export type AnthropicCompletionChunk = {
+    completion: string;
+    model: string;
+    stop: string;
+    stop_reason: string;
+    truncated: boolean;
+    exception: string;
+    log_id: string;
+}
+
 export type Skill = {
     template: TemplateItem[];
     templatePrefix: string;
@@ -46,6 +64,7 @@ export interface IModelProvider {
     modelName: ModelEnum;
     getCompletion: (ICompletionContext: ICompletionContext) => Promise<ICompletionResult>;
     withPromptProcessor: (promptProcessor: IPromptProcessor) => IModelProvider;
+    streamCompletion: (ICompletionContext: ICompletionContext) => AsyncGenerator<IConversationalCompletionChunk, void, unknown>;
     promptProcessor: IPromptProcessor;
 }
 
@@ -64,10 +83,12 @@ export type StringTemplateItem = {
 
 export enum ModelEnum {
     GPT4 = 'gpt-4',
+    CLAUDEV1 = 'claude-v1'
 }
 
 export interface IProvider {
     getCompletion: (ICompletionContext: ICompletionContext) => Promise<ICompletionResult>;
+    streamCompletion: (ICompletionContext: ICompletionContext) => Promise<AsyncGenerator<IConversationalCompletionChunk, void, unknown>>;
 }
 
 export type OpenAIChatCompletionResponse = {
@@ -96,6 +117,12 @@ export interface ICompletionContext {
     modelName: string;
     skill: Skill;
     userInput: UserParameters;
+}
+
+export interface IConversationalCompletionChunk {
+    content: string;
+    role: OpenAIConversationRole;
+    id: string;
 }
 
 export interface ICompletionResult {
